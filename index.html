@@ -293,33 +293,83 @@
             100% { text-shadow: 0 0 20px #ff5555, 0 0 40px #ff5555; }
         }
         
-        .note {
+        /* Note Section dengan Gambar */
+        .note-section {
             text-align: center;
-            font-size: 1.5rem;
-            font-weight: 800;
             margin-top: 40px;
             padding: 25px;
-            background: rgba(255, 0, 0, 0.25);
+            background: rgba(255, 0, 0, 0.15);
             border-radius: 20px;
             border: 2px solid rgba(255, 0, 0, 0.7);
+            box-shadow: 
+                0 10px 40px rgba(255, 0, 0, 0.3),
+                inset 0 0 30px rgba(255, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .note-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff0000, #ff5555, #ff0000);
+            background-size: 400% 400%;
+            border-radius: 20px;
+            z-index: -1;
+            animation: note-border 3s ease infinite;
+            opacity: 0.5;
+        }
+        
+        @keyframes note-border {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .note-image-container {
+            margin-bottom: 20px;
+        }
+        
+        .note-image {
+            max-width: 300px;
+            border-radius: 15px;
+            border: 3px solid rgba(255, 0, 0, 0.7);
+            box-shadow: 
+                0 0 30px rgba(255, 0, 0, 0.5),
+                inset 0 0 20px rgba(255, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .note-image:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 50px rgba(255, 0, 0, 0.7),
+                inset 0 0 30px rgba(255, 0, 0, 0.3);
+        }
+        
+        .note-text {
+            font-size: 1.5rem;
+            font-weight: 800;
             color: #ff5555;
             text-shadow: 
                 0 0 20px #ff5555,
                 0 0 40px #ff5555;
-            box-shadow: 
-                0 10px 40px rgba(255, 0, 0, 0.3),
-                inset 0 0 30px rgba(255, 0, 0, 0.2);
             animation: note-glow 2s ease-in-out infinite alternate;
+            padding: 15px;
+            background: rgba(255, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-top: 15px;
+            display: inline-block;
         }
         
         @keyframes note-glow {
             0% { 
                 text-shadow: 0 0 20px #ff5555, 0 0 40px #ff5555;
-                box-shadow: 0 10px 40px rgba(255, 0, 0, 0.3), inset 0 0 30px rgba(255, 0, 0, 0.2);
             }
             100% { 
-                text-shadow: 0 0 25px #ff5555, 0 0 50px #ff5555;
-                box-shadow: 0 15px 50px rgba(255, 0, 0, 0.4), inset 0 0 40px rgba(255, 0, 0, 0.3);
+                text-shadow: 0 0 25px #ff5555, 0 0 50px #ff5555, 0 0 70px #ff5555;
             }
         }
         
@@ -407,6 +457,10 @@
             
             .qris-image {
                 max-width: 280px;
+            }
+            
+            .note-image {
+                max-width: 250px;
             }
         }
         
@@ -501,7 +555,7 @@
                 <div class="qris-container">
                     <!-- QRIS Image -->
                     <div class="qris-image">
-                        <img src="https://files.catbox.moe/l47ju8.jpg" 
+                        <img src="https://i.ibb.co/nMHvDqJr/qris-image.jpg" 
                              alt="QRIS Code" 
                              onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=REV+TAVAN+PAYMENT+GATEWAY+NMID%3A+ID2022228753010';"
                              style="width: 100%; height: auto;">
@@ -512,9 +566,17 @@
             </div>
         </div>
         
-        <!-- Important Note -->
-        <div class="note">
-            <i class="fas fa-exclamation-triangle"></i> WAJIB SS BUKTI TF DETAIL TRANSAKSI AGAR TIDAK DRAMA
+        <!-- Note Section dengan Gambar -->
+        <div class="note-section">
+            <div class="note-image-container">
+                <img src="https://files.catbox.moe/rteiqw.png" 
+                     alt="Note SS Bukti TF QRIS" 
+                     class="note-image"
+                     onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=NOTE%3A+SS+BUKTI+TF+QRIS+WAJIB%21';">
+            </div>
+            <div class="note-text">
+                <i class="fas fa-exclamation-triangle"></i> WAJIB SS BUKTI TF DETAIL TRANSAKSI AGAR TIDAK DRAMA
+            </div>
         </div>
         
         <!-- Supported Payments -->
@@ -532,7 +594,7 @@
         </div>
         
         <div class="footer">
-            REV TAMVAN Payment Gateway © 2026 | NMID: ID2022228753010
+            REV TAMVAN Payment Gateway © 2023 | NMID: ID2022228753010
         </div>
     </div>
     
@@ -545,6 +607,13 @@
                 this.alt = 'QRIS Placeholder';
             });
             
+            // Fallback jika gambar note tidak bisa dimuat
+            const noteImage = document.querySelector('.note-image');
+            noteImage.addEventListener('error', function() {
+                this.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=NOTE%3A+SS+BUKTI+TF+QRIS+WAJIB%21';
+                this.alt = 'Note Placeholder';
+            });
+            
             // Efek partikel cahaya
             createLightParticles();
             
@@ -553,34 +622,38 @@
                 container.className = 'light-particles';
                 document.body.appendChild(container);
                 
-                const colors = ['#00a2ff', '#ffffff', '#00e6ff'];
+                const colors = ['#00a2ff', '#ffffff', '#00e6ff', '#ff5555'];
                 
-                for (let i = 0; i < 15; i++) {
+                for (let i = 0; i < 20; i++) {
                     const particle = document.createElement('div');
                     particle.style.position = 'absolute';
-                    const size = Math.random() * 100 + 50;
+                    const size = Math.random() * 120 + 60;
                     particle.style.width = size + 'px';
                     particle.style.height = size + 'px';
-                    particle.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}20 0%, transparent 70%)`;
+                    
+                    // Untuk partikel merah di area note
+                    const colorIndex = i < 5 ? 3 : Math.floor(Math.random() * 3);
+                    particle.style.background = `radial-gradient(circle, ${colors[colorIndex]}30 0%, transparent 70%)`;
+                    
                     particle.style.borderRadius = '50%';
                     particle.style.left = Math.random() * 100 + 'vw';
                     particle.style.top = Math.random() * 100 + 'vh';
-                    particle.style.opacity = '0.3';
-                    particle.style.filter = 'blur(20px)';
+                    particle.style.opacity = '0.2';
+                    particle.style.filter = 'blur(25px)';
                     
                     container.appendChild(particle);
                     
                     // Animasi partikel
-                    animateParticle(particle);
+                    animateParticle(particle, colorIndex === 3);
                 }
             }
             
-            function animateParticle(particle) {
+            function animateParticle(particle, isRed) {
                 let x = parseFloat(particle.style.left);
                 let y = parseFloat(particle.style.top);
-                let dx = (Math.random() - 0.5) * 0.3;
-                let dy = (Math.random() - 0.5) * 0.3;
-                let opacity = 0.3;
+                let dx = (Math.random() - 0.5) * 0.2;
+                let dy = (Math.random() - 0.5) * 0.2;
+                let opacity = isRed ? 0.15 : 0.2;
                 let increasing = true;
                 
                 function move() {
@@ -588,16 +661,16 @@
                     y += dy;
                     
                     // Pantulan di tepi layar
-                    if (x <= -10 || x >= 110) dx = -dx;
-                    if (y <= -10 || y >= 110) dy = -dy;
+                    if (x <= -20 || x >= 120) dx = -dx;
+                    if (y <= -20 || y >= 120) dy = -dy;
                     
                     // Efek fade in/out
                     if (increasing) {
-                        opacity += 0.01;
-                        if (opacity >= 0.5) increasing = false;
+                        opacity += 0.005;
+                        if (opacity >= (isRed ? 0.25 : 0.3)) increasing = false;
                     } else {
-                        opacity -= 0.01;
-                        if (opacity <= 0.1) increasing = true;
+                        opacity -= 0.005;
+                        if (opacity <= (isRed ? 0.1 : 0.15)) increasing = true;
                     }
                     
                     particle.style.left = x + 'vw';
