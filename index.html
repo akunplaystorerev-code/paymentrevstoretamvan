@@ -165,6 +165,7 @@
         .whatsapp-button {
             background: linear-gradient(90deg, #25D366, #128C7E);
             color: white;
+            margin-top: 15px;
         }
 
         .whatsapp-button:hover {
@@ -176,6 +177,86 @@
         .button-icon {
             margin-right: 10px;
             font-size: 1.2rem;
+        }
+
+        /* QRIS Nominal Section */
+        .qris-nominal-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .nominal-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #ddd;
+            text-align: center;
+        }
+
+        .nominal-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .nominal-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 12px 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .nominal-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nominal-option.active {
+            background: rgba(253, 121, 168, 0.3);
+            border-color: #fd79a8;
+            box-shadow: 0 0 15px rgba(253, 121, 168, 0.5);
+        }
+
+        .custom-nominal {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .custom-nominal input {
+            flex: 1;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px 0 0 10px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .custom-nominal input:focus {
+            border-color: #fd79a8;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .custom-nominal button {
+            padding: 12px 20px;
+            background: linear-gradient(90deg, #fd79a8, #e84393);
+            border: none;
+            border-radius: 0 10px 10px 0;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .custom-nominal button:hover {
+            background: linear-gradient(90deg, #e84393, #fd79a8);
         }
 
         .copy-notification {
@@ -247,6 +328,10 @@
                 height: 50px;
                 font-size: 24px;
             }
+            
+            .nominal-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 480px) {
@@ -264,6 +349,10 @@
             
             .detail-value {
                 margin-top: 5px;
+            }
+            
+            .nominal-options {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -337,10 +426,32 @@
                     <div class="payment-title">QRIS</div>
                 </div>
                 
+                <div class="qris-nominal-section">
+                    <div class="nominal-title">Pilih atau Masukkan Nominal Pembayaran</div>
+                    
+                    <div class="nominal-options">
+                        <div class="nominal-option" data-nominal="10000">Rp 10.000</div>
+                        <div class="nominal-option" data-nominal="20000">Rp 20.000</div>
+                        <div class="nominal-option" data-nominal="50000">Rp 50.000</div>
+                        <div class="nominal-option" data-nominal="100000">Rp 100.000</div>
+                        <div class="nominal-option" data-nominal="150000">Rp 150.000</div>
+                        <div class="nominal-option" data-nominal="200000">Rp 200.000</div>
+                    </div>
+                    
+                    <div class="custom-nominal">
+                        <input type="number" id="customNominal" placeholder="Masukkan nominal lainnya">
+                        <button id="setCustomNominal">Gunakan</button>
+                    </div>
+                </div>
+                
                 <div class="payment-details">
                     <div class="detail-row">
                         <span class="detail-label">Metode:</span>
                         <span class="detail-value">Kode QR Pembayaran</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Nominal:</span>
+                        <span class="detail-value" id="selectedNominalText">Rp 50.000</span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Catatan:</span>
@@ -350,14 +461,14 @@
                 
                 <button class="whatsapp-button" id="whatsappBtn">
                     <i class="fab fa-whatsapp button-icon"></i>
-                    MINTA QRIS
+                    MINTA QRIS (Rp 50.000)
                 </button>
             </div>
         </div>
     </div>
     
     <div class="footer">
-        <p>© 2026 Modern Payment Gateway. Pastikan Anda telah membayar dengan nominal yang tepat.</p>
+        <p>© 2023 Modern Payment Gateway. Pastikan Anda telah membayar dengan nominal yang tepat.</p>
     </div>
     
     <div class="copy-notification" id="copyNotification">
@@ -365,6 +476,9 @@
     </div>
 
     <script>
+        // Data untuk aplikasi
+        let selectedNominal = 50000; // Default nominal
+        
         // Fungsi untuk menyalin nomor ke clipboard
         document.querySelectorAll('.copy-button').forEach(button => {
             button.addEventListener('click', function() {
@@ -386,10 +500,80 @@
             });
         });
         
+        // Fungsi untuk mengatur nominal QRIS
+        function setupQRISNominal() {
+            // Set default active nominal
+            document.querySelectorAll('.nominal-option').forEach(option => {
+                if (option.getAttribute('data-nominal') === "50000") {
+                    option.classList.add('active');
+                }
+                
+                option.addEventListener('click', function() {
+                    // Hapus active class dari semua opsi
+                    document.querySelectorAll('.nominal-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Tambah active class ke opsi yang dipilih
+                    this.classList.add('active');
+                    
+                    // Update nominal yang dipilih
+                    selectedNominal = parseInt(this.getAttribute('data-nominal'));
+                    updateNominalDisplay();
+                });
+            });
+            
+            // Custom nominal input
+            document.getElementById('setCustomNominal').addEventListener('click', function() {
+                const customInput = document.getElementById('customNominal');
+                const value = parseInt(customInput.value);
+                
+                if (value && value > 0) {
+                    // Hapus active class dari semua opsi
+                    document.querySelectorAll('.nominal-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Update nominal yang dipilih
+                    selectedNominal = value;
+                    updateNominalDisplay();
+                    
+                    // Reset input
+                    customInput.value = '';
+                    showNotification('Nominal custom berhasil diatur!');
+                } else {
+                    showNotification('Masukkan nominal yang valid!');
+                }
+            });
+            
+            // Enter key untuk custom nominal
+            document.getElementById('customNominal').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('setCustomNominal').click();
+                }
+            });
+        }
+        
+        // Fungsi untuk update tampilan nominal
+        function updateNominalDisplay() {
+            // Format nominal dengan titik sebagai pemisah ribuan
+            const formattedNominal = new Intl.NumberFormat('id-ID').format(selectedNominal);
+            
+            // Update teks nominal
+            document.getElementById('selectedNominalText').textContent = `Rp ${formattedNominal}`;
+            
+            // Update teks tombol WhatsApp
+            document.getElementById('whatsappBtn').innerHTML = `
+                <i class="fab fa-whatsapp button-icon"></i>
+                MINTA QRIS (Rp ${formattedNominal})
+            `;
+        }
+        
         // Fungsi untuk membuka WhatsApp dengan nomor yang ditentukan
         document.getElementById('whatsappBtn').addEventListener('click', function() {
             const phoneNumber = '628134610771';
-            const message = 'Halo, saya ingin meminta kode QRIS untuk pembayaran.';
+            const formattedNominal = new Intl.NumberFormat('id-ID').format(selectedNominal);
+            const message = `Halo, saya ingin meminta kode QRIS untuk pembayaran sebesar Rp ${formattedNominal}.`;
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
         });
@@ -407,6 +591,9 @@
         
         // Animasi untuk halaman saat dimuat
         document.addEventListener('DOMContentLoaded', function() {
+            // Setup QRIS nominal
+            setupQRISNominal();
+            
             // Scroll ke kontainer pembayaran
             setTimeout(() => {
                 document.querySelector('.payment-container').scrollIntoView({ 
@@ -417,4 +604,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
